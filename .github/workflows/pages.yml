@@ -1,8 +1,8 @@
 # cttp.ai (cttp spec §8): on every push to main the registry contract is exported as static files
 # with `cttp serve --export` — `/`, `/<name>`, `/<name>.json`, `/<name>@<label>.json`, byte for
 # byte what the live server answers — and published to GitHub Pages behind the custom domain.
-# Pages must be set to deploy from GitHub Actions (Settings → Pages → Source), and CTTP_TOKEN is
-# the same read token the verify workflow uses to install cttp.
+# Pages must be set to deploy from GitHub Actions (Settings → Pages → Source); cttp is installed
+# straight from its public repository.
 name: pages
 on:
   push:
@@ -27,9 +27,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install cttp
-        run: pip install --quiet "git+https://x-access-token:${CTTP_TOKEN}@github.com/leorinaldi/cttp.git"
-        env:
-          CTTP_TOKEN: ${{ secrets.CTTP_TOKEN }}
+        run: pip install --quiet "git+https://github.com/leorinaldi/cttp.git"
       - name: cttp serve --export
         run: |
           cttp serve --export site --registry .

@@ -3,8 +3,8 @@
 # owner is the target's account, the target path exists, every label's ref is a revision, and the
 # name resolves. A claim that fails cannot be merged.
 #
-# `cttp` is installed from its repository; CTTP_TOKEN is a fine-grained token with read access to
-# it (Settings → Secrets → Actions). Run by hand from the Actions tab to verify every name.
+# `cttp` is installed straight from its public repository, so a claim from a fork runs the same
+# check with no secret. Run by hand from the Actions tab to verify every name.
 name: verify
 on:
   pull_request:
@@ -22,9 +22,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install cttp
-        run: pip install --quiet "git+https://x-access-token:${CTTP_TOKEN}@github.com/leorinaldi/cttp.git"
-        env:
-          CTTP_TOKEN: ${{ secrets.CTTP_TOKEN }}
+        run: pip install --quiet "git+https://github.com/leorinaldi/cttp.git"
       - name: Names added or changed by this pull request
         id: changed
         run: |
