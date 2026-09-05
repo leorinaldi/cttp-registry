@@ -1,0 +1,39 @@
+# The registry's checks (cttp spec §8): every pull request that touches an entry is verified with
+# `cttp name verify` — the target declares the name in its cttp.toml at its default branch, the
+# owner is the target's account, the target path exists, every label's ref is a revision, and the
+# name resolves. A claim that fails cannot be merged.
+#
+# `cttp` is installed from its repository; CTTP_TOKEN is a fine-grained token with read access to
+# it (Settings → Secrets → Actions). Run by hand from the Actions tab to verify every name.
+name: verify
+on:
+  pull_request:
+    paths: ["names/**", "cttp.toml"]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install cttp
+        run: pip install --quiet "git+https://x-access-token:${CTTP_TOKEN}@github.com/leorinaldi/cttp.git"
+        env:
+          CTTP_TOKEN: ${{ secrets.CTTP_TOKEN }}
+      - name: Names added or changed by this pull request
+        id: changed
+        run: |
+          names=""
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            names=$(git diff --name-only --diff-filter=AM "origin/${{ github.base_ref }}...HEAD" -- names/ \
+              | sed -n 's|^names/\(.*\)\.toml$|\1|p' | tr '\n' ' ')
+          fi
+          echo "names=$names" >> "$GITHUB_OUTPUT"
+          echo "verifying: ${names:-every name}"
+      - name: cttp name verify
+        run: cttp name verify --registry . ${{ steps.changed.outputs.names }}
