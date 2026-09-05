@@ -1,0 +1,8 @@
+name = "bogus"
+description = "A claim the target never declared."
+owner = "github.com/leorinaldi"
+target = "github.com/leorinaldi/cttp-registry/snippets/hello_world.py"
+default = "latest"
+
+[versions]
+latest = "main"
